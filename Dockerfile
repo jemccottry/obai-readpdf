@@ -3,10 +3,10 @@ FROM node:lts-alpine AS builder
 
 USER node
 WORKDIR /home/node
-
+RUN sudo chmod -R 777 /home/node
 COPY package*.json .
 RUN npm install
-
+RUN sudo chmod -R 777 /home/node
 COPY --chown=node:node . .
 RUN npm run build && npm prune --omit=dev
 
