@@ -1,28 +1,24 @@
-# Build stage
-FROM node:lts-alpine AS builder
+FROM node:21.2 AS builder
 
-USER node
-WORKDIR /home/node
+# Create app directory
+WORKDIR /app
 
-COPY package*.json .
+# A wildcard is used to ensure both package.json AND package-lock.json are copied
+COPY package*.json ./
+COPY prisma ./prisma/
+
+# Install app dependencies
 RUN npm install
 
-COPY --chown=node:node . .
-RUN npm run build && npm prune --omit=dev
+COPY . .
 
+RUN npm run build
 
-# Final run stage
-FROM node:lts-alpine
+FROM node:21.2
 
-ENV NODE_ENV production
-USER node
-WORKDIR /home/node
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package*.json ./
+COPY --from=builder /app/dist ./dist
 
-COPY --from=builder --chown=node:node /home/node/package*.json .
-COPY --from=builder --chown=node:node /home/node/node_modules ./node_modules
-COPY --from=builder --chown=node:node /home/node/dist ./dist
-
-ARG PORT
-EXPOSE ${PORT:-3000}
-
-CMD ["node", "dist/main.js"]
+EXPOSE 3000
+CMD [ "npm", "run", "start:prod" ]
