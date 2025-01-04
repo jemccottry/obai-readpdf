@@ -9,7 +9,7 @@ import { ConfigService } from './config/config.service';
 import { ThrottlerExceptionFilter } from './filters/throttler-exception.filter';  // Import the custom filter
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
-const port = process.env.PORT || 3000
+const port = 4000
 console.log(`Launching NestJS app on port ${port}, URL: http://0.0.0.0:${port}`)
 
 async function bootstrap() {
@@ -53,6 +53,6 @@ async function bootstrap() {
     const document = SwaggerModule.createDocument(app, config);
     SwaggerModule.setup('docs', app, document)
 
-  await app.listen(port);
+  await app.listen(4000);
 }
 bootstrap();
