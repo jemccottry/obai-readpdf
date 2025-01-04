@@ -2,6 +2,7 @@
 FROM node:lts-alpine AS builder
 
 USER node
+RUN mkdir -p /home/node/
 WORKDIR /home/node
 RUN chmod -R 777 /home/node
 COPY package*.json .
