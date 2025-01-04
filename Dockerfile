@@ -1,29 +1,23 @@
 # Build stage
 FROM node:lts-alpine AS builder
 
-USER node
-RUN mkdir -p /home/node/
-WORKDIR /home/node
-COPY package*.json .
-RUN chmod -R 777 /home/node
+WORKDIR /usr/src/app
+
+# A wildcard is used to ensure both package.json AND package-lock.json are copied
+COPY package*.json ./
+
+# Install app dependencies
 RUN npm install
-RUN chmod -R 777 /home/node
-COPY --chown=node:node . .
-RUN npm run build && npm prune --omit=dev
+
+# Bundle app source
+COPY . .
 
 
-# Final run stage
-FROM node:lts-alpine
+# Creates a "dist" folder with the production build
+RUN npm run build
 
-ENV NODE_ENV production
-USER node
-WORKDIR /home/node
+# Expose the port on which the app will run
+EXPOSE 3000
 
-COPY --from=builder --chown=node:node /home/node/package*.json .
-COPY --from=builder --chown=node:node /home/node/node_modules ./node_modules
-COPY --from=builder --chown=node:node /home/node/dist ./dist
-
-ARG PORT
-EXPOSE ${PORT:-3000}
-
-CMD ["node", "dist/main.js"]
+# Start the server using the production build
+CMD ["npm", "run", "start:prod"]
