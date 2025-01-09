@@ -52,7 +52,10 @@ async function bootstrap() {
 
     const document = SwaggerModule.createDocument(app, config);
     SwaggerModule.setup('docs', app, document)
-
+    app.enableCors({
+      allowedHeaders:"*",
+      origin: "*"
+  });
   await app.listen(3000, "0.0.0.0");
 }
 bootstrap();
