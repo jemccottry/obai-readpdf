@@ -14,9 +14,14 @@ console.log(`Launching NestJS app on port ${port}, URL: http://0.0.0.0:${port}`)
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, new FastifyAdapter());
-  
+
   const fastifyInstance = app.getHttpAdapter().getInstance();
-  fastifyInstance.register(fastifyMultipart);
+  fastifyInstance.register(fastifyMultipart, {
+    limits: {
+      fileSize: 50 * 1024 * 1024, // 50MB
+      files: 50, // 50 files
+    },
+  });
 
   const configService = app.get(ConfigService);
   app.useGlobalFilters(new ThrottlerExceptionFilter());
@@ -29,7 +34,7 @@ async function bootstrap() {
 
     if ((!apiKey || apiKey !== configService.apiKey) && (method == 'POST')) {
       //console.log("Unauthorized access: Invalid or missing API key");
-    return reply.status(401).send({ message: 'Unauthorized access: Invalid or missing API key' });
+      return reply.status(401).send({ message: 'Unauthorized access: Invalid or missing API key' });
     }
     done();
   });
@@ -45,16 +50,16 @@ async function bootstrap() {
 
 
   const config = new DocumentBuilder()
-  .setTitle('PDFReader')
-  .setDescription('OBAI claim hail claim document reader')
-  .setVersion('1.0')
-  .build()
+    .setTitle('PDFReader')
+    .setDescription('OBAI claim hail claim document reader')
+    .setVersion('1.0')
+    .build()
 
-    const document = SwaggerModule.createDocument(app, config);
-    SwaggerModule.setup('docs', app, document)
-    app.enableCors({
-      allowedHeaders:"*",
-      origin: "*"
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('docs', app, document)
+  app.enableCors({
+    allowedHeaders: "*",
+    origin: "*"
   });
   await app.listen(3000, "0.0.0.0");
 }
